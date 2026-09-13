@@ -1,159 +1,148 @@
-# Detective Crab
+# Detective Crab / SecureBank
 
-Aplicacion web de demostracion para detectar transferencias inusuales y situaciones de posible coercion. El proyecto combina una interfaz bancaria, una API en FastAPI, MongoDB, Snowflake, Gemini y ElevenLabs.
+Prototipo de banca segura para detectar transferencias inusuales y señales de posible coercion. La aplicacion combina una interfaz PWA, una API en FastAPI, MongoDB para el estado operativo, Snowflake para auditoria y servicios de Gemini y ElevenLabs para revisar y comunicar alertas.
 
-> **Aviso:** es un prototipo para demostracion. No debe usarse para manejar dinero real ni datos reales de clientes.
+> **Importante:** este proyecto es una demostracion tecnica. No debe manejar dinero real, credenciales reales ni datos personales de clientes.
 
-## Que necesitas
+## Arquitectura
 
-Elige una de estas opciones:
+El navegador carga la PWA desde FastAPI. `frontend/js/app.js` envia solicitudes HTTP a `/api`; `backend/routes.py` valida los datos, aplica las reglas de seguridad y coordina las bases de datos y servicios externos.
 
-- **Docker Desktop**, recomendado si no quieres instalar Python.
-- **Python 3.11 o posterior**, si prefieres ejecutarlo directamente.
-
-En ambos casos necesitaras acceso a estos servicios:
-
-- MongoDB, para usuarios y saldos.
-- Snowflake, para registrar transacciones.
-- Google Gemini, para analizar la respuesta de seguridad.
-- ElevenLabs, para generar el audio de alerta.
-
-Las credenciales las debe proporcionar la persona responsable del proyecto. Nunca las publiques en GitHub.
-
-## Descargar el proyecto
-
-1. Instala Git desde [git-scm.com/downloads](https://git-scm.com/downloads).
-2. Abre PowerShell o una terminal.
-3. Ejecuta:
-
-```powershell
-git clone https://github.com/galleto/Detective_Crab.git
-cd Detective_Crab
+```mermaid
+flowchart LR
+    UI[Frontend PWA] -->|JSON /api| API[FastAPI]
+    API --> MODELS[Modelos Pydantic]
+    API --> RULES[Servicios de riesgo e IA]
+    API --> MONGO[(MongoDB)]
+    API --> SNOW[(Snowflake: auditoria)]
+    RULES --> GEMINI[Google Gemini]
+    RULES --> ELEVEN[ElevenLabs]
 ```
 
-## Configurar las credenciales
+### Flujo de una transferencia
 
-1. Crea un archivo llamado `.env` en la carpeta principal del proyecto.
-2. Copia en ese archivo la plantilla de `.env.example`.
-3. Reemplaza cada valor de ejemplo por las credenciales reales.
+1. El frontend envia usuario, PIN, monto, cuenta destino y concepto a `POST /api/transfer`.
+2. La API obtiene el usuario desde MongoDB.
+3. Si el PIN coincide con el PIN invertido, se registra `PANIC_ALERT` en Snowflake y se responde con `503`.
+4. Si el monto supera tres veces el promedio del usuario, se genera un audio de alerta y la operacion queda en estado `held`.
+5. Si el monto es normal, se descuenta el saldo en MongoDB y se registra `APPROVED` en Snowflake.
+6. Una operacion retenida se confirma con `POST /api/confirm_transfer`; Gemini clasifica la respuesta como segura o riesgosa y se registra el resultado.
 
-El archivo debe tener esta forma:
+## Estructura del proyecto
+
+```text
+.
+|-- backend/
+|   |-- __init__.py       Marca backend como paquete Python.
+|   |-- main.py           Crea FastAPI, configura CORS, ciclo de vida y archivos estaticos.
+|   |-- models.py         Define los esquemas Pydantic de entrada.
+|   |-- routes.py         Implementa login, transferencias y confirmacion de seguridad.
+|   |-- services.py       Contiene la regla de monto, Gemini y ElevenLabs.
+|   `-- database.py       Abre MongoDB, conecta Snowflake y crea la tabla de auditoria.
+|-- frontend/
+|   |-- index.html        Estructura las vistas de login, transferencia, alerta y error.
+|   |-- css/style.css     Define layout, formularios, botones y estados visuales.
+|   |-- js/app.js         Maneja eventos, fetch, sesiones y cambios de pantalla.
+|   |-- manifest.json     Declara nombre, iconos y modo instalable de la PWA.
+|   `-- sw.js             Cachea recursos estaticos para carga con conectividad limitada.
+|-- clientes.json         Datos de referencia; no se importa automaticamente en MongoDB.
+|-- requirements.txt      Dependencias Python del backend.
+|-- Dockerfile            Imagen y comando de arranque para produccion/demo.
+`-- README.md             Documentacion tecnica y pasos de ejecucion.
+```
+
+## Responsabilidades por modulo
+
+### Backend
+
+- **`backend/main.py`**: crea la instancia `app`, permite CORS para desarrollo, inicializa MongoDB y Snowflake al arrancar, cierra MongoDB al detenerse y monta `frontend/` en `/static`.
+- **`backend/models.py`**: define `LoginRequest`, `TransferRequest` y `VoiceConfirmRequest`. FastAPI usa estos modelos para validar automaticamente los cuerpos JSON.
+- **`backend/routes.py`**: contiene la logica HTTP. El login busca o crea usuarios en `banco_db.usuarios`; la transferencia selecciona el flujo normal, de alerta silenciosa o de revision; la confirmacion consulta Gemini.
+- **`backend/services.py`**: aisla integraciones externas. La regla local considera sospechoso un monto mayor que `3 * promedio`; Gemini analiza texto y ElevenLabs genera el MP3.
+- **`backend/database.py`**: carga variables de entorno, conserva el cliente global de MongoDB y crea conexiones de Snowflake bajo demanda. La tabla `TRANSACTIONS` guarda estados de auditoria.
+
+### Frontend
+
+- **`frontend/index.html`**: contiene cuatro pantallas ocultables mediante la clase `active`: login, formulario de transferencia, confirmacion de voz y error 503.
+- **`frontend/js/app.js`**: conserva `currentUserId` y `currentTransactionId`, envia las tres solicitudes de la API y decide que pantalla mostrar segun la respuesta.
+- **`frontend/css/style.css`**: presenta la aplicacion en un contenedor movil y define los estilos de formularios, alertas, reproductor y error.
+- **`frontend/manifest.json`**: configura la instalacion como aplicacion independiente. Sus iconos apuntan actualmente a recursos remotos de demostracion.
+- **`frontend/sw.js`**: instala un cache estatico y responde primero desde cache. Las solicitudes de API no se precargan.
+
+## API
+
+| Metodo | Ruta | Funcion |
+| --- | --- | --- |
+| `POST` | `/api/login` | Busca el usuario o crea uno nuevo con saldo inicial simulado. |
+| `POST` | `/api/transfer` | Valida PIN y monto; aprueba, retiene o activa alerta silenciosa. |
+| `POST` | `/api/confirm_transfer` | Analiza la respuesta del usuario y resuelve una operacion retenida. |
+
+Ejemplo de transferencia:
+
+```json
+{
+  "user_id": "id-obtenido-en-login",
+  "pin": "1234",
+  "amount": 2500,
+  "destination_account": "0000000000000000",
+  "concept": "Pago de prueba"
+}
+```
+
+La documentacion interactiva queda disponible en `/docs` y `/redoc` cuando el servidor esta activo.
+
+## Configuracion
+
+Crea un archivo `.env` en la raiz. No existe una plantilla automatica en el repositorio; usa estas variables como referencia:
 
 ```env
-MONGODB_URI=mongodb+srv://usuario:contraseña@cluster.mongodb.net/
-MONGODB_USERNAME=usuario
-MONGODB_PASSWORD=contraseña
-
-ELEVENLABS_API_KEY=tu_clave_de_elevenlabs
+MONGODB_URI=mongodb+srv://usuario:contrasena@cluster.mongodb.net/
 GEMINI_API_KEY=tu_clave_de_gemini
-
+ELEVENLABS_API_KEY=tu_clave_de_elevenlabs
 SNOWFLAKE_ACCOUNT=tu_cuenta
 SNOWFLAKE_USER=tu_usuario
-SNOWFLAKE_PASSWORD=tu_contraseña
+SNOWFLAKE_PASSWORD=tu_contrasena
 SNOWFLAKE_WAREHOUSE=tu_warehouse
 SNOWFLAKE_DATABASE=tu_base_de_datos
 SNOWFLAKE_SCHEMA=tu_schema
 SNOWFLAKE_ROLE=tu_rol
 ```
 
-No subas `.env` al repositorio. Ya esta incluido en `.gitignore` y `.dockerignore`.
+MongoDB debe aceptar la conexion indicada y Snowflake debe permitir crear `TRANSACTIONS`. El backend no lee `MONGODB_USERNAME` ni `MONGODB_PASSWORD` por separado: la autenticacion se obtiene de `MONGODB_URI`.
 
-## Opcion A: ejecutar con Docker
+## Ejecucion local
 
-1. Instala y abre [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-2. Desde la carpeta del proyecto, construye la imagen:
-
-```powershell
-docker build -t detective-crab .
-```
-
-3. Inicia la aplicacion:
-
-```powershell
-docker run --env-file .env -p 8000:8000 --name detective-crab-app detective-crab
-```
-
-4. Abre [http://localhost:8000](http://localhost:8000) en el navegador.
-
-Para detenerla, pulsa `Ctrl+C`. Si el nombre ya existe, elimina el contenedor anterior con:
-
-```powershell
-docker rm -f detective-crab-app
-```
-
-## Opcion B: ejecutar con Python
-
-1. Instala Python 3.11 o posterior desde [python.org/downloads](https://www.python.org/downloads/). Durante la instalacion, activa **Add Python to PATH**.
-2. Abre una terminal en la carpeta del proyecto.
-3. Crea un entorno virtual:
+Requisitos: Python 3.11 o posterior, acceso a MongoDB, Snowflake y las claves de Gemini y ElevenLabs.
 
 ```powershell
 python -m venv .venv
-```
-
-4. Activalo en Windows:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-Si PowerShell bloquea la activacion, ejecuta una vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y vuelve a intentarlo.
-
-5. Instala las dependencias:
-
-```powershell
 python -m pip install -r requirements.txt
-```
-
-6. Inicia el servidor:
-
-```powershell
 python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-7. Abre [http://127.0.0.1:8000](http://127.0.0.1:8000).
+Abre `http://127.0.0.1:8000`. Para probar la interfaz, usa cualquier usuario nuevo y un PIN de prueba. Un usuario creado por el prototipo comienza con saldo `50000.0` y promedio de transaccion `1000.0`.
 
-Para detener el servidor, pulsa `Ctrl+C` en la terminal.
+## Ejecucion con Docker
 
-## Como probarlo
-
-1. En la pantalla de inicio, escribe cualquier usuario y PIN de prueba. Si no existe, el sistema lo crea en MongoDB.
-2. Completa una transferencia con un monto menor o igual a tres veces el promedio del usuario. Debe aprobarse de forma normal.
-3. Para probar la alerta de transferencia inusual, usa un monto mayor a tres veces el promedio. El sistema pedira una confirmacion de seguridad.
-4. Para probar la alerta silenciosa, introduce el PIN al reves durante una transferencia. El sistema mostrara un error 503 simulado.
-
-El usuario nuevo comienza con un saldo simulado de `$50,000` y un promedio de transaccion de `$1,000`.
-
-## Direcciones utiles
-
-- Aplicacion: [http://localhost:8000](http://localhost:8000)
-- Documentacion interactiva de la API: [http://localhost:8000/docs](http://localhost:8000/docs)
-- Esquema alternativo de la API: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-
-## Problemas frecuentes
-
-**El navegador no abre la pagina**
-
-Confirma que la terminal muestre que Uvicorn esta ejecutandose y que estas usando el puerto `8000`.
-
-**Aparece un error al iniciar MongoDB o Snowflake**
-
-Revisa que `.env` exista, que no tenga espacios alrededor de `=`, y que las credenciales y permisos sigan vigentes.
-
-**La alerta de voz no tiene audio**
-
-Comprueba `ELEVENLABS_API_KEY`. Si la clave no funciona, la aplicacion puede continuar, pero la respuesta recibida no tendra audio.
-
-**La confirmacion de seguridad falla**
-
-Comprueba `GEMINI_API_KEY` y que la cuenta tenga acceso al modelo configurado.
-
-## Estructura principal
-
-```text
-backend/       API, conexiones y reglas de seguridad
-frontend/      Interfaz web y PWA
-clientes.json  Datos de ejemplo
-Dockerfile     Configuracion para ejecutar con Docker
-requirements.txt
+```powershell
+docker build -t detective-crab .
+docker run --env-file .env -p 8000:8000 --name detective-crab-app detective-crab
 ```
+
+El `Dockerfile` instala `requirements.txt`, copia el backend y frontend, expone el puerto `8000` y arranca `uvicorn` escuchando en `0.0.0.0`.
+
+## Pruebas manuales
+
+1. **Flujo normal:** usa un monto menor o igual a `3 * avg_transaction`; debe descontar el saldo y registrar `APPROVED`.
+2. **Flujo sospechoso:** usa un monto mayor a tres veces el promedio; debe devolver `held`, un identificador de transaccion y, si ElevenLabs responde, audio Base64.
+3. **Flujo de panico:** introduce el PIN al reves; debe registrar `PANIC_ALERT` y devolver `503` sin revelar al atacante que la señal fue detectada.
+4. **Confirmacion:** responde una frase segura o una frase que indique presion; Gemini determina si se registra `APPROVED_AFTER_REVIEW` o `BLOCKED_FRAUD_DETECTED`.
+
+## Limitaciones conocidas
+
+- El PIN se guarda en texto plano y el login crea usuarios automaticamente; esto solo es valido para una demo.
+- La transferencia retenida no conserva todos sus datos para ejecutarla despues: la confirmacion registra la revision, pero no descuenta el saldo.
+- Las consultas SQL se construyen con interpolacion de strings; una implementacion real debe usar parametros y validacion estricta.
+- CORS permite cualquier origen y el frontend usa iconos remotos; ambos valores deben restringirse antes de desplegar.
+- No hay suite automatizada de pruebas ni importador para `clientes.json`.
