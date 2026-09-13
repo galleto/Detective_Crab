@@ -5,6 +5,6 @@ pymongo
 snowflake-connector-python
 python-dotenv
 elevenlabs
-google-generativeai
+google-genai
 pydantic
 

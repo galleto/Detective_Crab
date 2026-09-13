@@ -1,28 +1,20 @@
 import os
-import google.generativeai as genai
+from google import genai
 from elevenlabs.client import ElevenLabs
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Gemini Config
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # ElevenLabs Config
 elevenlabs_client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 def is_suspicious_transaction(amount: float, user_avg_amount: float = 1000.0) -> bool:
-    # Lógica de detección de fraude simulada (podría ser un modelo en Snowflake)
-    # Si el monto es mucho mayor al promedio (ej. > 3x), es sospechosa
     return amount > (user_avg_amount * 3)
 
 async def evaluate_user_response(user_text: str) -> bool:
-    """
-    Usa Gemini para evaluar si el usuario está bajo presión o extorsión 
-    basado en su respuesta.
-    Retorna True si es seguro proceder, False si hay peligro/duda.
-    """
-    model = genai.GenerativeModel('gemini-1.5-pro')
     prompt = f"""
     Eres un asistente de seguridad bancaria experto en detectar coerción, 
     estrés o engaño en las respuestas de los usuarios.
@@ -37,25 +29,23 @@ async def evaluate_user_response(user_text: str) -> bool:
     
     Responde ÚNICAMENTE con TRUE o FALSE.
     """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
     result = response.text.strip().upper()
     return "TRUE" in result
 
 def generate_voice_alert(message: str) -> bytes:
-    """
-    Genera un audio con ElevenLabs preguntando al usuario sobre la transacción.
-    Retorna los bytes del audio de forma sincrónica.
-    """
     try:
-        audio = elevenlabs_client.generate(
+        audio = elevenlabs_client.text_to_speech.convert(
             text=message,
-            voice="Rachel",
-            model="eleven_multilingual_v2"
+            voice_id="21m00Tcm4TlvDq8ikWAM",
+            model_id="eleven_multilingual_v2",
+            output_format="mp3_44100_128"
         )
-        # audio is a generator, we need to consume it to bytes
         audio_bytes = b"".join([chunk for chunk in audio])
         return audio_bytes
     except Exception as e:
         print(f"Error generando audio con ElevenLabs: {e}")
         return b""
-
