@@ -1,4 +1,4 @@
-# 🦀 Detective Crab — SecureBank
+# 🦀 Detective Crab —
 
 > **Track 3 · Real-Time Anomaly & Security Sentinel (Risk & Security Focus)**
 >
