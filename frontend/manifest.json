@@ -1,0 +1,22 @@
+{
+  "name": "SecureBank",
+  "short_name": "SecureBank",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0047AB",
+  "description": "App bancaria segura con prevención de fraude.",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/1024px-Google_Drive_icon_%282020%29.svg.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/1024px-Google_Drive_icon_%282020%29.svg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

@@ -1,0 +1,157 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f8;
+    color: #333;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.screen {
+    display: none;
+    padding: 20px;
+}
+
+.screen.active {
+    display: block;
+}
+
+.header-logo {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.header-logo h1 {
+    color: #0047AB;
+    margin-top: 10px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #eaeaea;
+}
+
+.card h3 {
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.input-group input, .input-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.danger-zone small {
+    display: block;
+    color: #888;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.primary-btn {
+    background: #0047AB;
+    color: white;
+}
+
+.primary-btn:hover {
+    background: #003380;
+}
+
+.secondary-btn {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.alert-box {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.alert-box.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.audio-player {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.audio-player audio {
+    width: 100%;
+}
+
+.error-container {
+    text-align: center;
+    padding-top: 60px;
+}
+
+.error-container h2 {
+    color: #dc3545;
+    margin: 20px 0 10px;
+}
+
+.error-container p {
+    color: #666;
+    margin-bottom: 10px;
+}
+

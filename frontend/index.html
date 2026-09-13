@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SecureBank PWA</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Iconos de Material Design -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Pantalla de Login -->
+        <div id="login-screen" class="screen active">
+            <div class="header-logo">
+                <i class="material-icons" style="font-size: 48px; color: #0047AB;">security</i>
+                <h1>SecureBank</h1>
+            </div>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Usuario</label>
+                    <input type="text" id="login-username" required placeholder="Tu usuario">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña / PIN</label>
+                    <input type="password" id="login-password" required placeholder="Tu contraseña">
+                </div>
+                <button type="submit" class="btn primary-btn">Ingresar</button>
+            </form>
+        </div>
+
+        <!-- Pantalla Principal / Transferencia -->
+        <div id="transfer-screen" class="screen">
+            <header class="app-header">
+                <h2>Transferencias</h2>
+                <button id="logout-btn" class="icon-btn"><i class="material-icons">logout</i></button>
+            </header>
+            
+            <div class="card">
+                <h3>Nueva Transferencia</h3>
+                <form id="transfer-form">
+                    <div class="input-group">
+                        <label>Cuenta Destino</label>
+                        <input type="text" id="tx-destination" required placeholder="0000 0000 0000 0000">
+                    </div>
+                    <div class="input-group">
+                        <label>Monto ($)</label>
+                        <input type="number" id="tx-amount" required placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label>Concepto</label>
+                        <input type="text" id="tx-concept" required placeholder="Pago, renta, etc.">
+                    </div>
+                    <div class="input-group danger-zone">
+                        <label>Confirma tu PIN</label>
+                        <input type="password" id="tx-pin" required placeholder="****">
+                        <small>Ingresa tu PIN al revés si estás en peligro.</small>
+                    </div>
+                    <button type="submit" class="btn primary-btn">Transferir</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pantalla de Confirmación de Voz (Fraude) -->
+        <div id="voice-auth-screen" class="screen">
+            <div class="alert-box warning">
+                <i class="material-icons">warning</i>
+                <h3>Transacción Retenida</h3>
+                <p>Hemos detectado actividad inusual.</p>
+            </div>
+            <p>Escucha el mensaje de seguridad e ingresa tu respuesta:</p>
+            
+            <div class="audio-player">
+                <audio id="security-audio" controls></audio>
+            </div>
+            
+            <form id="voice-confirm-form">
+                <div class="input-group">
+                    <label>¿Qué respondes a la operadora?</label>
+                    <textarea id="user-voice-response" rows="3" required placeholder="Ej: Sí, soy yo... o No sé, me dijeron que depositara..."></textarea>
+                </div>
+                <button type="submit" class="btn primary-btn">Confirmar</button>
+            </form>
+        </div>
+        
+        <!-- Pantalla de Error 503 (Simulado) -->
+        <div id="error-screen" class="screen">
+            <div class="error-container">
+                <i class="material-icons" style="font-size: 64px; color: #dc3545;">error_outline</i>
+                <h2>Error 503</h2>
+                <p>Sistema caído. Tu cuenta ha sido congelada temporalmente por fallas del sistema.</p>
+                <p>Acude a tu sucursal más cercana.</p>
+                <button id="return-btn" class="btn secondary-btn" style="margin-top: 20px;">Volver</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+            .then(() => console.log('Service Worker Registered'));
+        }
+    </script>
+</body>
+</html>
+
