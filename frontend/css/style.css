@@ -248,4 +248,46 @@ body {
 /* =========================================================
    6. PANTALLA DE ERROR 503 (#error-screen)
    ========================================================= */
-#error-screen { background-color: #F7F8FC; }
+
+.encabezado-neutro {
+    background-color: #F7F8FC;
+    padding: 20px;
+    text-align: center;
+}
+
+.marca-pequena {
+    color: #94A0B8;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.contenedor-error {
+    text-align: center;
+    padding-top: 40px;
+}
+
+.icono-error {
+    font-size: 48px;
+    color: #94A0B8;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.titulo-error {
+    color: #475569;
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+.codigo-error {
+    color: #94A0B8;
+    font-size: 14px;
+    margin: 8px 0 25px;
+}
+
+.enlace-centrado {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+}

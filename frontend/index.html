@@ -46,7 +46,7 @@
         <!-- ================= 2. PANTALLA DE LOGIN ================= -->
         <div id="login-screen" class="screen">
             <header class="encabezado">
-                <img class="logo-login" src="Detective (4).png" alt="Logotipo">
+
                 <img class="logo-login" src="Detective.png" alt="Logotipo">
                 <p class="intro">Detecta al instante, <span class="coloracion">verifica sin friccion</span>.</p>
             </header>
@@ -142,19 +142,23 @@
             </main>
         </div>
         
-        <!-- ================= 5. PANTALLA DE ERROR 503 ================= -->
-        <div id="error-screen" class="screen">
-            <main class="contenedor-panel" style="text-align: center; padding-top: 50px;">
-                <span aria-hidden="true" style="font-size: 64px;">🚫</span>
-                <h2 style="color: #D32F2F; margin: 20px 0;">Error 503</h2>
-                <p class="texto-detalle" style="font-size: 20px;">El sistema está temporalmente fuera de servicio para proteger tu cuenta.</p>
-                <p class="texto-ayuda">Acude a tu sucursal más cercana o llama a un familiar.</p>
-                
-                <!-- Conservamos id="return-btn" -->
-                <button id="return-btn" class="boton boton-llamada" style="margin-top: 30px;">Volver al inicio</button>
-            </main>
-        </div>
+        <!-- ================= 5. PANTALLA DE ERROR ================= -->
+<div id="error-screen" class="screen">
+    <header class="encabezado-neutro">
+        <p class="marca-pequena">Detective Crab</p>
+    </header>
 
+    <main class="contenedor-panel contenedor-error">
+        <span aria-hidden="true" class="icono-error">🔧</span>
+        <h2 class="titulo-error">Servicio no disponible</h2>
+        <p class="texto-detalle">Estamos presentando un problema técnico temporal. Intenta de nuevo en unos minutos.</p>
+        <p class="codigo-error">Código: SVC-503</p>
+
+        <!-- Conservamos id="return-btn" -->
+        <button id="return-btn" class="boton boton-principal">Reintentar</button>
+        <a class="enlace enlace-centrado" href="tel:8441234567">¿Sigue sin funcionar? Llama a soporte</a>
+    </main>
+</div>
     </div>
 
     <!-- Carga de Scripts Originales -->
