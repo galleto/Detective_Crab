@@ -38,6 +38,7 @@ app.include_router(api_router, prefix="/api")
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
     @app.get("/")
     async def serve_index():
