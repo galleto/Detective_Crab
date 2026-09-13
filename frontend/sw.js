@@ -1,5 +1,5 @@
 // Versión del caché estático; cambiarla fuerza la actualización de recursos.
-const CACHE_NAME = 'detective-crab-v5';
+const CACHE_NAME = 'detective-crab-v7';
 
 // Recursos mínimos necesarios para abrir la interfaz sin red.
 const ASSETS = [

@@ -118,4 +118,9 @@ async def transfer(request: TransferRequest):
     except Exception as e:
         print("Error en Snowflake:", e)
         
-    return {"status": "success", "message": "Transferencia exitosa", "new_balance": new_balance}
+    return {
+        "status": "success",
+        "message": "Transferencia exitosa",
+        "transaction_id": tx_id,
+        "new_balance": new_balance
+    }

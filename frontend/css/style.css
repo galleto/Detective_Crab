@@ -225,6 +225,8 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
+.boton-accion.grabando { background-color: #D32F2F; color: #FFFFFF; }
+.boton-accion:disabled { cursor: not-allowed; opacity: 0.65; }
 
 
 /* =========================================================

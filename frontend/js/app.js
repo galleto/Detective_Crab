@@ -15,6 +15,74 @@ const transferScreen = document.getElementById('transfer-screen');
 const voiceAuthScreen = document.getElementById('voice-auth-screen');
 const errorScreen = document.getElementById('error-screen');
 const receiptScreen = document.getElementById('receipt-screen');
+const voiceInputButton = document.getElementById('voice-input-btn');
+const voiceInputStatus = document.getElementById('voice-input-status');
+const voiceResponseInput = document.getElementById('user-voice-response');
+
+// Usa la transcripción nativa del navegador y limita cada escucha a cinco segundos.
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let speechRecognition = null;
+let speechTimeout = null;
+
+if (voiceInputButton) {
+    if (SpeechRecognition) {
+        speechRecognition = new SpeechRecognition();
+        speechRecognition.lang = 'es-MX';
+        speechRecognition.interimResults = false;
+        speechRecognition.continuous = false;
+
+        speechRecognition.onstart = () => {
+            voiceInputButton.textContent = '⏹️ Detener micrófono';
+            voiceInputButton.setAttribute('aria-label', 'Detener micrófono');
+            voiceInputButton.classList.add('grabando');
+            voiceInputStatus.textContent = 'Escuchando... habla ahora (máximo 5 segundos).';
+            speechTimeout = setTimeout(() => speechRecognition.stop(), 5000);
+        };
+
+        speechRecognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join(' ')
+                .trim();
+            if (transcript) {
+                voiceResponseInput.value = voiceResponseInput.value.trim()
+                    ? `${voiceResponseInput.value.trim()} ${transcript}`
+                    : transcript;
+                voiceResponseInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+
+        speechRecognition.onerror = (event) => {
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                voiceInputStatus.textContent = 'Permite el acceso al micrófono para usar esta opción.';
+            } else if (event.error !== 'aborted') {
+                voiceInputStatus.textContent = 'No se pudo transcribir. Intenta de nuevo.';
+            }
+        };
+
+        speechRecognition.onend = () => {
+            clearTimeout(speechTimeout);
+            voiceInputButton.textContent = '🎙️ Hablar respuesta';
+            voiceInputButton.setAttribute('aria-label', 'Hablar respuesta');
+            voiceInputButton.classList.remove('grabando');
+            if (!voiceInputStatus.textContent.startsWith('Permite') && !voiceInputStatus.textContent.startsWith('No se pudo')) {
+                voiceInputStatus.textContent = 'Listo. Revisa tu respuesta antes de confirmar.';
+            }
+        };
+
+        voiceInputButton.addEventListener('click', () => {
+            if (voiceInputButton.classList.contains('grabando')) {
+                speechRecognition.stop();
+            } else {
+                voiceInputStatus.textContent = '';
+                speechRecognition.start();
+            }
+        });
+    } else {
+        voiceInputButton.disabled = true;
+        voiceInputStatus.textContent = 'Tu navegador no admite transcripción por micrófono.';
+    }
+}
 
 const btnIniciarApp = document.getElementById('btn-iniciar-app');
 if (btnIniciarApp) {

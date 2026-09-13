@@ -126,6 +126,10 @@
                 <form id="voice-confirm-form" class="formulario">
                     <label class="etiqueta" for="user-voice-response">¿Qué respondes a la operadora?</label>
                     <textarea class="campo" id="user-voice-response" rows="3" required placeholder="Escribe aquí tu respuesta..." style="min-height: 100px; padding-top: 15px;"></textarea>
+                    <button type="button" id="voice-input-btn" class="boton boton-accion" aria-label="Hablar respuesta" style="margin-top: 10px; width: 100%;">
+                        🎙️ Hablar respuesta
+                    </button>
+                    <p id="voice-input-status" class="texto-ayuda" role="status" aria-live="polite" style="text-align: center; min-height: 24px;"></p>
 
                     <button type="submit" class="boton boton-principal">Confirmar identidad</button>
                 </form>
