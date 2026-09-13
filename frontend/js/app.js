@@ -4,6 +4,9 @@ const API_URL = '/api';
 // Estado mínimo de la sesión y de la transferencia retenida.
 let currentUserId = null;
 let currentTransactionId = null;
+let currentTxAmount = 0;
+let currentTxDestination = '';
+let currentTxConcept = '';
 
 // Referencias a las vistas que se alternan durante el flujo bancario.
 const welcomeScreen = document.getElementById('welcome-screen');
@@ -11,6 +14,7 @@ const loginScreen = document.getElementById('login-screen');
 const transferScreen = document.getElementById('transfer-screen');
 const voiceAuthScreen = document.getElementById('voice-auth-screen');
 const errorScreen = document.getElementById('error-screen');
+const receiptScreen = document.getElementById('receipt-screen');
 
 const btnIniciarApp = document.getElementById('btn-iniciar-app');
 if (btnIniciarApp) {
@@ -24,6 +28,23 @@ function showScreen(screenEl) {
     // Solo una pantalla permanece visible a la vez.
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     screenEl.classList.add('active');
+}
+
+function showReceipt(amount, destination, concept, txId) {
+    document.getElementById('receipt-amount').textContent = `$${parseFloat(amount).toFixed(2)}`;
+    document.getElementById('receipt-destination').textContent = destination;
+    document.getElementById('receipt-source').textContent = currentUserId || 'Cuenta Principal';
+    document.getElementById('receipt-concept').textContent = concept || 'N/A';
+    document.getElementById('receipt-id').textContent = txId || Math.floor(Math.random() * 1000000000).toString();
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const timeStr = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    
+    document.getElementById('receipt-date').textContent = dateStr;
+    document.getElementById('receipt-time').textContent = timeStr;
+    
+    showScreen(receiptScreen);
 }
 
 // Envía las credenciales y conserva el identificador de usuario recibido.
@@ -58,6 +79,10 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
     const amount = parseFloat(document.getElementById('tx-amount').value);
     const concept = document.getElementById('tx-concept').value;
     const pin = document.getElementById('tx-pin').value;
+    
+    currentTxAmount = amount;
+    currentTxDestination = destination;
+    currentTxConcept = concept;
 
     try {
         const res = await fetch(`${API_URL}/transfer`, {
@@ -87,11 +112,17 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
                     audioEl.src = `data:audio/mp3;base64,${data.audio_base64}`;
                 }
                 
+                // Mostrar texto de la IA en pantalla
+                const spokenTextEl = document.getElementById('ai-spoken-text');
+                if (spokenTextEl && data.spoken_text) {
+                    spokenTextEl.textContent = `"${data.spoken_text}"`;
+                }
+                
                 showScreen(voiceAuthScreen);
             } else {
                 // La API aprobó directamente la transferencia.
-                alert(`Transferencia exitosa. Nuevo saldo: $${data.new_balance}`);
                 document.getElementById('transfer-form').reset();
+                showReceipt(currentTxAmount, currentTxDestination, currentTxConcept, data.transaction_id);
             }
         } else {
             alert(data.detail || 'Error en la transferencia');
@@ -118,9 +149,8 @@ document.getElementById('voice-confirm-form').addEventListener('submit', async (
         const data = await res.json();
         
         if (res.ok) {
-            alert(data.message);
             document.getElementById('voice-confirm-form').reset();
-            showScreen(transferScreen);
+            showReceipt(currentTxAmount, currentTxDestination, currentTxConcept, currentTransactionId);
         } else {
             alert(data.detail);
             showScreen(transferScreen);
@@ -139,5 +169,9 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 
 document.getElementById('return-btn').addEventListener('click', () => {
     showScreen(loginScreen);
+});
+
+document.getElementById('receipt-return-btn').addEventListener('click', () => {
+    showScreen(transferScreen);
 });
 

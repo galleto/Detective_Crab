@@ -1,13 +1,60 @@
+import uuid
+import base64
+from fastapi import APIRouter, HTTPException
+from .models import TransferRequest, VoiceConfirmRequest, LoginRequest
+from .database import get_mongo_db, get_snowflake_conn
+from .services import is_suspicious_transaction, generate_voice_alert, evaluate_user_response
+
+router = APIRouter()
+
+@router.post("/login")
+async def login(request: LoginRequest):
+    db = get_mongo_db()
+    if db is None:
+        # Si la base de datos no está disponible, usamos un fallback dummy
+        return {"user_id": request.username, "message": "Login exitoso (fallback)"}
+        
+    user = await db.usuarios.find_one({"user_id": request.username})
+    if not user:
+        # Dummy fallback para hackathon
+        user = {
+            "user_id": request.username,
+            "password": request.password,
+            "pin": "1234",
+            "balance": 10000.0,
+            "avg_transaction": 1000.0
+        }
+        await db.usuarios.insert_one(user)
+    
+    return {"user_id": user["user_id"], "message": "Login exitoso"}
+
+@router.post("/confirm_transfer")
+async def confirm_transfer(request: VoiceConfirmRequest):
+    is_safe = await evaluate_user_response(request.user_response_text)
+    if is_safe:
+        return {"status": "success", "message": "Transferencia confirmada y procesada correctamente."}
+    else:
+        raise HTTPException(status_code=403, detail="Alerta de seguridad activada. Transacción cancelada y cuenta protegida.")
+
 @router.post("/transfer")
 async def transfer(request: TransferRequest):
     """Ejecuta el flujo normal, de pánico o de revisión por monto inusual."""
     db = get_mongo_db()
-    user = await db.usuarios.find_one({"user_id": request.user_id})
+    if db is not None:
+        user = await db.usuarios.find_one({"user_id": request.user_id})
+    else:
+        user = None
     
     if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        # Fallback si no hay usuario en DB
+        user = {
+            "user_id": request.user_id,
+            "pin": "1234",
+            "balance": 10000.0,
+            "avg_transaction": 1000.0
+        }
 
-    real_pin = user.get("pin", "")
+    real_pin = user.get("pin", "1234")
     input_pin = request.pin
 
     # Definir cuál será el PIN de pánico
@@ -15,7 +62,7 @@ async def transfer(request: TransferRequest):
     pin_panico = "9111" if es_palindromo else real_pin[::-1]
 
     # LOGICA 2: FLUJO DE PELIGRO / EXTORSION (Botón de pánico)
-    if input_pin == pin_panico and len(real_pin) > 1:
+    if input_pin in ["911", "9111"] or (input_pin == pin_panico and len(real_pin) > 1):
         # ALERTA SILENCIOSA
         print("!!! ALERTA DE PANICO RECIBIDA !!!")
         print(f"Usuario {request.user_id} ingresó el PIN de pánico.")
@@ -58,7 +105,8 @@ async def transfer(request: TransferRequest):
         
     # LOGICA 1: FLUJO NORMAL
     new_balance = user["balance"] - request.amount
-    await db.usuarios.update_one({"user_id": request.user_id}, {"$set": {"balance": new_balance}})
+    if db is not None:
+        await db.usuarios.update_one({"user_id": request.user_id}, {"$set": {"balance": new_balance}})
     
     # Registrar en Snowflake
     try:

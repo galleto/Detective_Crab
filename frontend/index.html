@@ -83,7 +83,6 @@
 
             <main class="contenedor-panel">
                 <div class="tarjeta-estado">
-                    <img class="mascota-estado" src="Detective.png" alt="Detective Crab sonriendo, tranquilo">
                     <p class="texto-estado"><span class="icono-estado" aria-hidden="true">✅</span> Todo está tranquilo</p>
                     <p class="texto-detalle">Estás protegido. Ingresa los datos para transferir.</p>
                 </div>
@@ -117,6 +116,7 @@
                 <div class="tarjeta-alerta" style="background-color: #FFF5F5; border: 3px solid #EF5350; border-radius: 24px; padding: 30px 20px; text-align: center;">
                     <p class="texto-alerta" style="color: #B71C1C; font-size: 24px; font-weight: bold;">⚠️ Transacción Retenida</p>
                     <p class="texto-detalle-alerta">Hemos detectado actividad inusual. Escucha el mensaje y responde.</p>
+                    <p id="ai-spoken-text" style="font-size: 16px; color: #555; margin-top: 15px; font-style: italic;"></p>
 
                     <div class="audio-player" style="margin: 20px 0;">
                         <audio id="security-audio" controls style="width: 100%;"></audio>
@@ -141,6 +141,58 @@
                 <p class="texto-ayuda">Acude a tu sucursal más cercana o llama a un familiar.</p>
 
                 <button id="return-btn" class="boton boton-llamada" style="margin-top: 30px;">Volver al inicio</button>
+            </main>
+        </div>
+
+        <!-- ================= 6. PANTALLA DE COMPROBANTE ================= -->
+        <div id="receipt-screen" class="screen">
+            <header class="encabezado-panel" style="background-color: #4CAF50;">
+                <h1 class="titulo-panel" style="color: white;">¡Transferencia Exitosa!</h1>
+            </header>
+
+            <main class="contenedor-panel">
+                <div style="background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span aria-hidden="true" style="font-size: 48px; color: #4CAF50;">✅</span>
+                        <h2 style="margin-top: 10px; color: #333;">Comprobante de Pago</h2>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 15px 0; margin-bottom: 20px;">
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #777;">Monto:</span>
+                            <strong style="font-size: 18px;" id="receipt-amount">$0.00</strong>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #777;">Cuenta Destino:</span>
+                            <strong id="receipt-destination">---</strong>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #777;">Cuenta de Salida:</span>
+                            <strong id="receipt-source">---</strong>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #777;">Concepto:</span>
+                            <strong id="receipt-concept">---</strong>
+                        </p>
+                    </div>
+
+                    <div style="font-size: 14px; color: #666;">
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>No. de Transacción:</span>
+                            <span id="receipt-id">---</span>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Fecha:</span>
+                            <span id="receipt-date">---</span>
+                        </p>
+                        <p style="display: flex; justify-content: space-between;">
+                            <span>Hora:</span>
+                            <span id="receipt-time">---</span>
+                        </p>
+                    </div>
+                </div>
+
+                <button id="receipt-return-btn" class="boton boton-principal" style="margin-top: 30px;">Hacer otra transferencia</button>
             </main>
         </div>
 
