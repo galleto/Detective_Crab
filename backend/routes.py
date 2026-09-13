@@ -24,7 +24,7 @@ async def login(request: LoginRequest):
             "user_id": user_id,
             "username": request.username,
             "pin": request.password, # en un entorno real, iría hasheado
-            "balance": 50000.0,
+            "balance": 500000.0,
             "avg_transaction": 1000.0
         })
         return {"status": "success", "user_id": user_id, "message": "Usuario creado"}
