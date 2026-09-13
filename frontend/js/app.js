@@ -6,10 +6,19 @@ let currentUserId = null;
 let currentTransactionId = null;
 
 // Referencias a las vistas que se alternan durante el flujo bancario.
+const welcomeScreen = document.getElementById('welcome-screen');
 const loginScreen = document.getElementById('login-screen');
 const transferScreen = document.getElementById('transfer-screen');
 const voiceAuthScreen = document.getElementById('voice-auth-screen');
 const errorScreen = document.getElementById('error-screen');
+
+const btnIniciarApp = document.getElementById('btn-iniciar-app');
+if (btnIniciarApp) {
+    btnIniciarApp.addEventListener('click', (e) => {
+        e.preventDefault();
+        showScreen(loginScreen);
+    });
+}
 
 function showScreen(screenEl) {
     // Solo una pantalla permanece visible a la vez.

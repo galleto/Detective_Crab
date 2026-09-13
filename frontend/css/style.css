@@ -1,169 +1,251 @@
-/* Normaliza medidas y tipografía para que la PWA conserve un layout estable. */
+/* =========================================================
+   1. CONFIGURACIÓN BASE Y LÓGICA DE LA PWA (SINGLE PAGE APP)
+   ========================================================= */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Fondo exterior y color base de la aplicación. */
 body {
     background-color: #f4f6f8;
-    color: #333;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Contenedor móvil centrado que simula la aplicación bancaria. */
+/* Contenedor principal que simula la app */
 .app-container {
     max-width: 480px;
     margin: 0 auto;
-    background: #fff;
+    background: #FFFFFF;
     min-height: 100vh;
     position: relative;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    overflow-x: hidden;
 }
 
-/* Las pantallas se alternan añadiendo la clase `active` desde app.js. */
+/* Lógica para ocultar/mostrar pantallas controlada por app.js */
 .screen {
-    display: none;
-    padding: 20px;
+    display: none; 
+    min-height: 100vh;
+    width: 100%;
 }
 
 .screen.active {
     display: block;
+    animation: fadeIn 0.4s ease-in-out;
 }
 
-/* Identidad visual de la pantalla de inicio. */
-.header-logo {
-    text-align: center;
-    margin: 40px 0;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.header-logo h1 {
-    color: #0047AB;
-    margin-top: 10px;
-}
 
-/* Barra superior de la vista de transferencias. */
-.app-header {
+/* =========================================================
+   2. PANTALLA DE BIENVENIDA (#welcome-screen)
+   ========================================================= */
+/* Nota: Cuando esta pantalla está activa, debe ser flex, no block */
+#welcome-screen.active {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    justify-content: center;
+    background: linear-gradient(165deg, #f0f4ff 0%, #ffffff 45%, #eef2ff 100%);
+    position: relative;
+}
+
+.bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(54, 79, 171, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.orb-1 { width: 420px; height: 420px; top: -120px; right: -100px; animation: orb-drift 12s ease-in-out infinite alternate; }
+.orb-2 { width: 320px; height: 320px; bottom: -80px; left: -80px; animation: orb-drift 14s ease-in-out infinite alternate-reverse; }
+.orb-3 { width: 180px; height: 180px; top: 40%; left: 10%; opacity: 0.6; animation: orb-drift 9s ease-in-out infinite alternate; }
+
+@keyframes orb-drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(18px, -14px) scale(1.06); }
+}
+
+.logo-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: logo-enter 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.protect-ring {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 2px solid rgba(54, 79, 171, 0.2);
+    animation: ring-pulse 3.2s ease-out 1.6s infinite;
+}
+.protect-ring:nth-child(2) { animation-delay: 2.4s; }
+
+.logo-bienvenida {
+    width: 240px;
+    max-width: 68vw;
+    height: auto;
+    position: relative;
+    z-index: 2;
+    animation: logo-breathe 4s ease-in-out 1.6s infinite;
+}
+
+@keyframes logo-enter { 0% { opacity: 0; transform: scale(0.55) translateY(40px); filter: blur(14px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes logo-breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.035); } }
+@keyframes ring-pulse { 0% { transform: scale(0.85); opacity: 0.45; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
+@keyframes text-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+.welcome-text { margin-top: 42px; font-size: 1.85rem; color: #364FAB; animation: text-rise 0.95s ease-out 1.25s both; }
+.subtitle { margin-top: 12px; font-size: 1.1rem; color: #475569; text-align: center; animation: text-rise 0.95s ease-out 1.55s both; }
+.content { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 24px; }
+.continue-hint { position: absolute; bottom: 44px; text-align: center; width: 100%; color: #64748b; animation: text-rise 1.2s ease 3s both; }
+.accent-line { width: 48px; height: 3px; background: #364FAB; border-radius: 999px; margin: 22px auto 0; animation: text-rise 0.8s ease 1.9s both; }
+
+
+/* =========================================================
+   3. PANTALLA DE LOGIN (#login-screen)
+   ========================================================= */
+#login-screen {
+    background-color: #F7F8FC;
+    text-align: center;
+    padding-bottom: 20px; 
+}
+
+.encabezado {
+    background-color: #FFFFFF;
+    padding: 30px 20px 24px;
+    border-bottom: 4px solid #364FAB;
+}
+
+.logo-login {
+    max-width: 300px;
+    width: 80%;
+    height: auto;
+    margin-bottom: 3px;
+}
+
+.intro { font-size: 16px; margin-top: 8px; }
+.coloracion { color: #364FAB; font-weight: bold; }
+
+.contenedor {
+    max-width: 400px;
+    margin: 30px auto;
+    background-color: #FFFFFF;
+    padding: 30px 24px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 20px rgba(38, 55, 125, 0.1);
+}
+
+.titulo-seccion { font-size: 22px; margin-bottom: 8px; }
+.texto-ayuda { font-size: 16px; color: #565E70; margin: 8px 0 20px; }
+
+/* Formularios Generales */
+.formulario { text-align: left; }
+.etiqueta { display: block; font-size: 17px; font-weight: bold; margin-bottom: 8px; color: #151923; }
+.campo {
+    width: 100%;
+    min-height: 50px;
+    font-size: 18px;
+    padding: 0 14px;
     margin-bottom: 20px;
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-}
-
-/* Agrupa el formulario principal y separa su contenido del fondo. */
-.card {
-    background: #fff;
+    border: 2px solid #E1E4EF;
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    border: 1px solid #eaeaea;
+    background-color: #F7F8FC;
+    box-sizing: border-box;
 }
+.campo:focus { outline: none; border-color: #364FAB; background-color: #FFFFFF; }
+.fila { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.recordar { font-size: 15px; color: #565E70; }
+.enlace { color: #364FAB; font-size: 15px; font-weight: bold; text-decoration: none; }
 
-.card h3 {
-    margin-bottom: 20px;
-    color: #444;
-}
-
-/* Espaciado común para etiquetas y controles de formulario. */
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
+/* Botones Generales */
+.boton {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #555;
-}
-
-.input-group input, .input-group textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-}
-
-.danger-zone small {
-    display: block;
-    color: #888;
-    margin-top: 5px;
-    font-size: 12px;
-}
-
-/* Estilo base compartido por las acciones de la interfaz. */
-.btn {
-    width: 100%;
-    padding: 14px;
+    min-height: 56px;
+    line-height: 56px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    text-align: center;
+    text-decoration: none;
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+.boton-principal { background-color: #364FAB; color: #FFFFFF; }
+.boton-principal:hover { background-color: #26377D; }
+.boton-llamada { background-color: #EEF1FF; color: #26377D; border: 2px solid #364FAB; line-height: 52px; }
+.separador { color: #565E70; font-size: 14px; margin-bottom: 14px; }
+
+
+/* =========================================================
+   4. PANEL PRINCIPAL / TRANSFERENCIA (#transfer-screen)
+   ========================================================= */
+#transfer-screen { background-color: #F7F8FC; padding-bottom: 30px; }
+
+.encabezado-panel {
+    background-color: #364FAB;
+    color: #FFFFFF;
+    padding: 25px 20px;
+    text-align: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+.titulo-panel { font-size: 24px; font-weight: bold; margin: 0; }
+
+.contenedor-panel { padding: 30px 20px; }
+
+.tarjeta-estado {
+    background-color: #FFFFFF;
+    border: 3px solid #E1E4EF;
+    border-radius: 24px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0px 8px 25px rgba(38, 55, 125, 0.08);
+}
+.mascota-estado { width: 100px; height: auto; margin-bottom: 10px; }
+.texto-estado { font-size: 22px; font-weight: bold; color: #2E7D32; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.texto-detalle { font-size: 16px; color: #475569; }
+
+.boton-accion {
+    background-color: #FFFFFF;
+    color: #D32F2F;
+    border: 2px solid #D32F2F;
+    width: 100%;
+    border-radius: 12px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
-.primary-btn {
-    background: #0047AB;
-    color: white;
+
+/* =========================================================
+   5. PANTALLA DE ALERTA / VOZ (#voice-auth-screen)
+   ========================================================= */
+#voice-auth-screen { background-color: #F7F8FC; }
+
+.tarjeta-alerta {
+    animation: pulse-alerta 2.5s infinite;
 }
 
-.primary-btn:hover {
-    background: #003380;
+@keyframes pulse-alerta {
+    0% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 83, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0); }
 }
 
-.secondary-btn {
-    background: #e0e0e0;
-    color: #333;
-}
+.texto-detalle-alerta { font-size: 18px; color: #151923; margin-top: 10px; }
 
-/* Mensaje visual para una transferencia retenida por riesgo. */
-.alert-box {
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-}
 
-.alert-box.warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-}
-
-/* Área del reproductor que contiene la alerta generada por ElevenLabs. */
-.audio-player {
-    margin: 20px 0;
-    text-align: center;
-}
-
-.audio-player audio {
-    width: 100%;
-}
-
-/* Presentación de la respuesta 503 del flujo de pánico. */
-.error-container {
-    text-align: center;
-    padding-top: 60px;
-}
-
-.error-container h2 {
-    color: #dc3545;
-    margin: 20px 0 10px;
-}
-
-.error-container p {
-    color: #666;
-    margin-bottom: 10px;
-}
-
+/* =========================================================
+   6. PANTALLA DE ERROR 503 (#error-screen)
+   ========================================================= */
+#error-screen { background-color: #F7F8FC; }

@@ -1,112 +1,172 @@
 <!DOCTYPE html>
-<!-- Documento raíz: define las cuatro vistas que app.js alterna. -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SecureBank PWA</title>
+    <title>Detective Crab - PWA</title>
+    
     <!-- El manifiesto permite instalar la interfaz como PWA. -->
     <link rel="manifest" href="/static/manifest.json">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Aquí deberás unificar tus CSS (Bienvenida, Login y Principal) en este archivo -->
     <link rel="stylesheet" href="/static/css/style.css">
-    <!-- Iconos de Material Design -->
+    <!-- Hoja de estilos principal -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Iconos (Opcionales si ya usas emojis, pero los dejamos por si los necesitas) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
-        <!-- Pantalla de Login -->
-        <div id="login-screen" class="screen active">
-            <div class="header-logo">
-                <i class="material-icons" style="font-size: 48px; color: #0047AB;">security</i>
-                <h1>SecureBank</h1>
+
+        <!-- ================= 1. PANTALLA DE BIENVENIDA (NUEVA) ================= -->
+        <!-- Nota: tiene la clase 'active' para que sea la primera en mostrarse -->
+        <div id="welcome-screen" class="screen active">
+            <!-- Asignamos un ID al botón/área que tu app.js deberá escuchar para pasar al login -->
+            <a href="#" id="btn-iniciar-app" style="position: absolute; width: 100%; height: 100%; z-index: 20;"></a>
+
+            <div class="bg-orb orb-1"></div>
+            <div class="bg-orb orb-2"></div>
+            <div class="bg-orb orb-3"></div>
+
+            <div class="content">
+                <div class="logo-stage">
+                    <div class="protect-ring"></div>
+                    <div class="protect-ring"></div>
+                    <img src="Detective.png" alt="Detective Crab" class="logo-bienvenida">
+                </div>
+                <div class="accent-line"></div>
+                <h1 class="welcome-text">¡Bienvenido!</h1>
+                <p class="subtitle">Detective Crab te protege<br>con calma y claridad</p>
             </div>
-            <form id="login-form">
-                <div class="input-group">
-                    <label>Usuario</label>
-                    <input type="text" id="login-username" required placeholder="Tu usuario">
-                </div>
-                <div class="input-group">
-                    <label>Contraseña / PIN</label>
-                    <input type="password" id="login-password" required placeholder="Tu contraseña">
-                </div>
-                <button type="submit" class="btn primary-btn">Ingresar</button>
-            </form>
+            <p class="continue-hint">Toca para continuar</p>
         </div>
 
-        <!-- Pantalla Principal / Transferencia -->
+        <!-- ================= 2. PANTALLA DE LOGIN ================= -->
+        <div id="login-screen" class="screen">
+            <header class="encabezado">
+                <img class="logo-login" src="Detective (4).png" alt="Logotipo">
+                <img class="logo-login" src="Detective.png" alt="Logotipo">
+                <p class="intro">Detecta al instante, <span class="coloracion">verifica sin friccion</span>.</p>
+            </header>
+
+            <main class="contenedor">
+                <h2 class="titulo-seccion">Iniciar sesión</h2>
+                <p class="texto-ayuda">Escribe tus datos para entrar a tu cuenta.</p>
+                
+                <!-- IMPORTANTE: Conservamos id="login-form" -->
+                <form id="login-form" class="formulario">
+                    <label class="etiqueta" for="login-username">Usuario o número de cuenta</label>
+                    <input class="campo" type="text" id="login-username" required placeholder="Escribe tu usuario">
+
+                    <label class="etiqueta" for="login-password">Contraseña</label>
+                    <input class="campo" type="password" id="login-password" required placeholder="Escribe tu contraseña">
+
+                    <div class="fila">
+                        <label class="recordar"><input type="checkbox" id="recordar"> Recordarme</label>
+                        <a class="enlace" href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    
+                    <!-- El type="submit" dispara el evento en tu app.js -->
+                    <button class="boton boton-principal" type="submit">Entrar a mi cuenta</button>
+                </form>
+                
+                <p class="separador">o</p>
+                <a class="boton boton-llamada" href="tel:8441234567">📞 Llamar a alguien de confianza</a>
+                <p class="texto-ayuda">Si necesitas ayuda para entrar, toca el botón de arriba.</p>
+            </main>
+        </div>
+
+        <!-- ================= 3. PANTALLA PRINCIPAL / TRANSFERENCIA ================= -->
         <div id="transfer-screen" class="screen">
-            <header class="app-header">
-                <h2>Transferencias</h2>
-                <button id="logout-btn" class="icon-btn"><i class="material-icons">logout</i></button>
+            <header class="encabezado-panel">
+                <h1 class="titulo-panel">Transferencias Seguras</h1>
+                <!-- Conservamos id="logout-btn" -->
+                <button id="logout-btn" class="boton-accion" style="margin-top: 15px; min-height: 50px; font-size: 16px;">Cerrar sesión</button>
             </header>
             
-            <div class="card">
-                <h3>Nueva Transferencia</h3>
-                <form id="transfer-form">
-                    <div class="input-group">
-                        <label>Cuenta Destino</label>
-                        <input type="text" id="tx-destination" required placeholder="0000 0000 0000 0000">
-                    </div>
-                    <div class="input-group">
-                        <label>Monto ($)</label>
-                        <input type="number" id="tx-amount" required placeholder="0.00">
-                    </div>
-                    <div class="input-group">
-                        <label>Concepto</label>
-                        <input type="text" id="tx-concept" required placeholder="Pago, renta, etc.">
-                    </div>
-                    <div class="input-group danger-zone">
-                        <label>Confirma tu PIN</label>
-                        <input type="password" id="tx-pin" required placeholder="****">
-                        <small>Ingresa tu PIN al revés si estás en peligro.</small>
-                    </div>
-                    <button type="submit" class="btn primary-btn">Transferir</button>
+            <main class="contenedor-panel">
+                <div class="tarjeta-estado">
+                    <img class="mascota-estado" src="Detective (4).png" alt="Detective Crab sonriendo, tranquilo">
+                    <img class="mascota-estado" src="Detective.png" alt="Detective Crab sonriendo, tranquilo">
+                    <p class="texto-estado"><span class="icono-estado" aria-hidden="true">✅</span> Todo está tranquilo</p>
+                    <p class="texto-detalle">Estás protegido. Ingresa los datos para transferir.</p>
+                </div>
+
+                <!-- Conservamos id="transfer-form" y todos los inputs -->
+                <form id="transfer-form" class="formulario" style="margin-top: 20px;">
+                    <label class="etiqueta" for="tx-destination">Cuenta Destino</label>
+                    <input class="campo" type="text" id="tx-destination" required placeholder="0000 0000 0000 0000">
+
+                    <label class="etiqueta" for="tx-amount">Monto ($)</label>
+                    <input class="campo" type="number" id="tx-amount" required placeholder="0.00">
+
+                    <label class="etiqueta" for="tx-concept">Concepto</label>
+                    <input class="campo" type="text" id="tx-concept" required placeholder="Pago, renta, etc.">
+
+                    <label class="etiqueta" style="color: #D32F2F;" for="tx-pin">Confirma tu PIN</label>
+                    <input class="campo" type="password" id="tx-pin" required placeholder="****">
+                    <p class="texto-ayuda" style="margin-top: -15px;">Ingresa tu PIN al revés si estás en peligro.</p>
+
+                    <button type="submit" class="boton boton-principal" style="margin-top: 10px;">Transferir</button>
                 </form>
-            </div>
+            </main>
         </div>
 
-        <!-- Pantalla de Confirmación de Voz (Fraude) -->
+        <!-- ================= 4. PANTALLA DE ALERTA / CONFIRMACIÓN DE VOZ ================= -->
         <div id="voice-auth-screen" class="screen">
-            <div class="alert-box warning">
-                <i class="material-icons">warning</i>
-                <h3>Transacción Retenida</h3>
-                <p>Hemos detectado actividad inusual.</p>
-            </div>
-            <p>Escucha el mensaje de seguridad e ingresa tu respuesta:</p>
-            
-            <div class="audio-player">
-                <audio id="security-audio" controls></audio>
-            </div>
-            
-            <form id="voice-confirm-form">
-                <div class="input-group">
-                    <label>¿Qué respondes a la operadora?</label>
-                    <textarea id="user-voice-response" rows="3" required placeholder="Ej: Sí, soy yo... o No sé, me dijeron que depositara..."></textarea>
+            <header class="encabezado-alerta" style="background-color: #D32F2F; color: white; padding: 25px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                <h1 class="titulo-panel">Pausa un momento</h1>
+            </header>
+
+            <main class="contenedor-panel">
+                <div class="tarjeta-alerta" style="background-color: #FFF5F5; border: 3px solid #EF5350; border-radius: 24px; padding: 30px 20px; text-align: center;">
+                    <p class="texto-alerta" style="color: #B71C1C; font-size: 24px; font-weight: bold;">⚠️ Transacción Retenida</p>
+                    <p class="texto-detalle-alerta">Hemos detectado actividad inusual. Escucha el mensaje y responde.</p>
+                    
+                    <!-- Conservamos id="security-audio" -->
+                    <div class="audio-player" style="margin: 20px 0;">
+                        <audio id="security-audio" controls style="width: 100%;"></audio>
+                    </div>
                 </div>
-                <button type="submit" class="btn primary-btn">Confirmar</button>
-            </form>
+                
+                <!-- Conservamos id="voice-confirm-form" -->
+                <form id="voice-confirm-form" class="formulario">
+                    <label class="etiqueta" for="user-voice-response">¿Qué respondes a la operadora?</label>
+                    <!-- Conservamos id="user-voice-response" -->
+                    <textarea class="campo" id="user-voice-response" rows="3" required placeholder="Escribe aquí tu respuesta..." style="min-height: 100px; padding-top: 15px;"></textarea>
+                    
+                    <button type="submit" class="boton boton-principal">Confirmar identidad</button>
+                </form>
+            </main>
         </div>
         
-        <!-- Pantalla de Error 503 (Simulado) -->
+        <!-- ================= 5. PANTALLA DE ERROR 503 ================= -->
         <div id="error-screen" class="screen">
-            <div class="error-container">
-                <i class="material-icons" style="font-size: 64px; color: #dc3545;">error_outline</i>
-                <h2>Error 503</h2>
-                <p>Sistema caído. Tu cuenta ha sido congelada temporalmente por fallas del sistema.</p>
-                <p>Acude a tu sucursal más cercana.</p>
-                <button id="return-btn" class="btn secondary-btn" style="margin-top: 20px;">Volver</button>
-            </div>
+            <main class="contenedor-panel" style="text-align: center; padding-top: 50px;">
+                <span aria-hidden="true" style="font-size: 64px;">🚫</span>
+                <h2 style="color: #D32F2F; margin: 20px 0;">Error 503</h2>
+                <p class="texto-detalle" style="font-size: 20px;">El sistema está temporalmente fuera de servicio para proteger tu cuenta.</p>
+                <p class="texto-ayuda">Acude a tu sucursal más cercana o llama a un familiar.</p>
+                
+                <!-- Conservamos id="return-btn" -->
+                <button id="return-btn" class="boton boton-llamada" style="margin-top: 30px;">Volver al inicio</button>
+            </main>
         </div>
 
     </div>
 
-    <!-- La lógica se carga al final para que los elementos del DOM ya existan. -->
+    <!-- Carga de Scripts Originales -->
     <script src="/static/js/app.js"></script>
+    <!-- Carga de Scripts -->
+    <script src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/static/sw.js')
+            navigator.serviceWorker.register('sw.js')
             .then(() => console.log('Service Worker Registered'));
         }
     </script>
 </body>
 </html>
-
