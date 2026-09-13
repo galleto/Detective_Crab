@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Detective Crab - PWA</title>
-    
-    <!-- El manifiesto permite instalar la interfaz como PWA. -->
-    <link rel="manifest" href="/static/manifest.json">
+    <title>Detective Crab</title>
+
+    <!-- PWA: manifest, tema y compatibilidad iOS/Android -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Aquí deberás unificar tus CSS (Bienvenida, Login y Principal) en este archivo -->
-    <link rel="stylesheet" href="/static/css/style.css">
-    <!-- Hoja de estilos principal -->
+    <meta name="theme-color" content="#364FAB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Detective Crab">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" href="icons/favicon.png">
+
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Iconos (Opcionales si ya usas emojis, pero los dejamos por si los necesitas) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
 
-        <!-- ================= 1. PANTALLA DE BIENVENIDA (NUEVA) ================= -->
-        <!-- Nota: tiene la clase 'active' para que sea la primera en mostrarse -->
+        <!-- ================= 1. PANTALLA DE BIENVENIDA ================= -->
         <div id="welcome-screen" class="screen active">
-            <!-- Asignamos un ID al botón/área que tu app.js deberá escuchar para pasar al login -->
             <a href="#" id="btn-iniciar-app" style="position: absolute; width: 100%; height: 100%; z-index: 20;"></a>
 
             <div class="bg-orb orb-1"></div>
@@ -41,21 +39,20 @@
                 <p class="subtitle">Detective Crab te protege<br>con calma y claridad</p>
             </div>
             <p class="continue-hint">Toca para continuar</p>
+            <button id="install-app-btn" class="boton-install" type="button" hidden>Instalar app</button>
         </div>
 
         <!-- ================= 2. PANTALLA DE LOGIN ================= -->
         <div id="login-screen" class="screen">
             <header class="encabezado">
-
-                <img class="logo-login" src="Detective.png" alt="Logotipo">
-                <p class="intro">Detecta al instante, <span class="coloracion">verifica sin friccion</span>.</p>
+                <img class="logo-login" src="Detective.png" alt="Logotipo Detective Crab">
+                <p class="intro">Detecta al instante, <span class="coloracion">verifica sin fricción</span>.</p>
             </header>
 
             <main class="contenedor">
                 <h2 class="titulo-seccion">Iniciar sesión</h2>
                 <p class="texto-ayuda">Escribe tus datos para entrar a tu cuenta.</p>
-                
-                <!-- IMPORTANTE: Conservamos id="login-form" -->
+
                 <form id="login-form" class="formulario">
                     <label class="etiqueta" for="login-username">Usuario o número de cuenta</label>
                     <input class="campo" type="text" id="login-username" required placeholder="Escribe tu usuario">
@@ -67,11 +64,10 @@
                         <label class="recordar"><input type="checkbox" id="recordar"> Recordarme</label>
                         <a class="enlace" href="#">¿Olvidaste tu contraseña?</a>
                     </div>
-                    
-                    <!-- El type="submit" dispara el evento en tu app.js -->
+
                     <button class="boton boton-principal" type="submit">Entrar a mi cuenta</button>
                 </form>
-                
+
                 <p class="separador">o</p>
                 <a class="boton boton-llamada" href="tel:8441234567">📞 Llamar a alguien de confianza</a>
                 <p class="texto-ayuda">Si necesitas ayuda para entrar, toca el botón de arriba.</p>
@@ -82,19 +78,16 @@
         <div id="transfer-screen" class="screen">
             <header class="encabezado-panel">
                 <h1 class="titulo-panel">Transferencias Seguras</h1>
-                <!-- Conservamos id="logout-btn" -->
                 <button id="logout-btn" class="boton-accion" style="margin-top: 15px; min-height: 50px; font-size: 16px;">Cerrar sesión</button>
             </header>
-            
+
             <main class="contenedor-panel">
                 <div class="tarjeta-estado">
-                    <img class="mascota-estado" src="Detective (4).png" alt="Detective Crab sonriendo, tranquilo">
                     <img class="mascota-estado" src="Detective.png" alt="Detective Crab sonriendo, tranquilo">
                     <p class="texto-estado"><span class="icono-estado" aria-hidden="true">✅</span> Todo está tranquilo</p>
                     <p class="texto-detalle">Estás protegido. Ingresa los datos para transferir.</p>
                 </div>
 
-                <!-- Conservamos id="transfer-form" y todos los inputs -->
                 <form id="transfer-form" class="formulario" style="margin-top: 20px;">
                     <label class="etiqueta" for="tx-destination">Cuenta Destino</label>
                     <input class="campo" type="text" id="tx-destination" required placeholder="0000 0000 0000 0000">
@@ -124,52 +117,41 @@
                 <div class="tarjeta-alerta" style="background-color: #FFF5F5; border: 3px solid #EF5350; border-radius: 24px; padding: 30px 20px; text-align: center;">
                     <p class="texto-alerta" style="color: #B71C1C; font-size: 24px; font-weight: bold;">⚠️ Transacción Retenida</p>
                     <p class="texto-detalle-alerta">Hemos detectado actividad inusual. Escucha el mensaje y responde.</p>
-                    
-                    <!-- Conservamos id="security-audio" -->
+
                     <div class="audio-player" style="margin: 20px 0;">
                         <audio id="security-audio" controls style="width: 100%;"></audio>
                     </div>
                 </div>
-                
-                <!-- Conservamos id="voice-confirm-form" -->
+
                 <form id="voice-confirm-form" class="formulario">
                     <label class="etiqueta" for="user-voice-response">¿Qué respondes a la operadora?</label>
-                    <!-- Conservamos id="user-voice-response" -->
                     <textarea class="campo" id="user-voice-response" rows="3" required placeholder="Escribe aquí tu respuesta..." style="min-height: 100px; padding-top: 15px;"></textarea>
-                    
+
                     <button type="submit" class="boton boton-principal">Confirmar identidad</button>
                 </form>
             </main>
         </div>
-        
-        <!-- ================= 5. PANTALLA DE ERROR ================= -->
-<div id="error-screen" class="screen">
-    <header class="encabezado-neutro">
-        <p class="marca-pequena">Detective Crab</p>
-    </header>
 
-    <main class="contenedor-panel contenedor-error">
-        <span aria-hidden="true" class="icono-error">🔧</span>
-        <h2 class="titulo-error">Servicio no disponible</h2>
-        <p class="texto-detalle">Estamos presentando un problema técnico temporal. Intenta de nuevo en unos minutos.</p>
-        <p class="codigo-error">Código: SVC-503</p>
+        <!-- ================= 5. PANTALLA DE ERROR 503 ================= -->
+        <div id="error-screen" class="screen">
+            <main class="contenedor-panel" style="text-align: center; padding-top: 50px;">
+                <span aria-hidden="true" style="font-size: 64px;">🚫</span>
+                <h2 style="color: #D32F2F; margin: 20px 0;">Error 503</h2>
+                <p class="texto-detalle" style="font-size: 20px;">El sistema está temporalmente fuera de servicio para proteger tu cuenta.</p>
+                <p class="texto-ayuda">Acude a tu sucursal más cercana o llama a un familiar.</p>
 
-        <!-- Conservamos id="return-btn" -->
-        <button id="return-btn" class="boton boton-principal">Reintentar</button>
-        <a class="enlace enlace-centrado" href="tel:8441234567">¿Sigue sin funcionar? Llama a soporte</a>
-    </main>
-</div>
+                <button id="return-btn" class="boton boton-llamada" style="margin-top: 30px;">Volver al inicio</button>
+            </main>
+        </div>
+
     </div>
 
-    <!-- Carga de Scripts Originales -->
-    <script src="/static/js/app.js"></script>
-    <!-- Carga de Scripts -->
     <script src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js')
             navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('Service Worker Registered'));
+                .then(() => console.log('Service Worker registrado'))
+                .catch(err => console.error('Error registrando Service Worker:', err));
         }
     </script>
 </body>
