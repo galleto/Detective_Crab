@@ -23,6 +23,26 @@ const voiceResponseInput = document.getElementById('user-voice-response');
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let speechRecognition = null;
 let speechTimeout = null;
+let speechErrorMessage = '';
+
+function setVoiceStatus(message) {
+    if (voiceInputStatus) {
+        voiceInputStatus.textContent = message;
+    }
+}
+
+async function requestMicrophonePermission() {
+    if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        throw new Error('secure-context');
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('microphone-unsupported');
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop());
+}
 
 if (voiceInputButton) {
     if (SpeechRecognition) {
@@ -32,10 +52,11 @@ if (voiceInputButton) {
         speechRecognition.continuous = false;
 
         speechRecognition.onstart = () => {
+            speechErrorMessage = '';
             voiceInputButton.textContent = '⏹️ Detener micrófono';
             voiceInputButton.setAttribute('aria-label', 'Detener micrófono');
             voiceInputButton.classList.add('grabando');
-            voiceInputStatus.textContent = 'Escuchando... habla ahora (máximo 5 segundos).';
+            setVoiceStatus('Escuchando... habla ahora (máximo 5 segundos).');
             speechTimeout = setTimeout(() => speechRecognition.stop(), 5000);
         };
 
@@ -54,9 +75,11 @@ if (voiceInputButton) {
 
         speechRecognition.onerror = (event) => {
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                voiceInputStatus.textContent = 'Permite el acceso al micrófono para usar esta opción.';
+                speechErrorMessage = 'Permite el acceso al micrófono en el navegador y vuelve a intentarlo.';
             } else if (event.error !== 'aborted') {
-                voiceInputStatus.textContent = 'No se pudo transcribir. Intenta de nuevo.';
+                speechErrorMessage = event.error === 'no-speech'
+                    ? 'No detecté voz. Acércate al micrófono e inténtalo de nuevo.'
+                    : 'No se pudo transcribir. Intenta de nuevo.';
             }
         };
 
@@ -65,22 +88,34 @@ if (voiceInputButton) {
             voiceInputButton.textContent = '🎙️ Hablar respuesta';
             voiceInputButton.setAttribute('aria-label', 'Hablar respuesta');
             voiceInputButton.classList.remove('grabando');
-            if (!voiceInputStatus.textContent.startsWith('Permite') && !voiceInputStatus.textContent.startsWith('No se pudo')) {
-                voiceInputStatus.textContent = 'Listo. Revisa tu respuesta antes de confirmar.';
-            }
+            setVoiceStatus(speechErrorMessage || 'Listo. Revisa tu respuesta antes de confirmar.');
         };
 
-        voiceInputButton.addEventListener('click', () => {
+        voiceInputButton.addEventListener('click', async () => {
             if (voiceInputButton.classList.contains('grabando')) {
                 speechRecognition.stop();
             } else {
-                voiceInputStatus.textContent = '';
-                speechRecognition.start();
+                speechErrorMessage = '';
+                setVoiceStatus('Solicitando permiso para usar el micrófono...');
+                try {
+                    await requestMicrophonePermission();
+                    speechRecognition.start();
+                } catch (error) {
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        setVoiceStatus('Micrófono bloqueado. Permite el micrófono en la configuración del sitio y vuelve a intentarlo.');
+                    } else if (error.message === 'secure-context') {
+                        setVoiceStatus('El micrófono requiere abrir la app en HTTPS o en localhost.');
+                    } else if (error.message === 'microphone-unsupported') {
+                        setVoiceStatus('Este navegador no permite acceso al micrófono. Usa Chrome o Edge actualizado.');
+                    } else {
+                        setVoiceStatus('No se pudo iniciar el micrófono. Revisa que no esté siendo usado por otra aplicación.');
+                    }
+                }
             }
         });
     } else {
         voiceInputButton.disabled = true;
-        voiceInputStatus.textContent = 'Tu navegador no admite transcripción por micrófono.';
+        setVoiceStatus('Este navegador no admite transcripción por micrófono. Usa Chrome o Edge actualizado.');
     }
 }
 
@@ -218,13 +253,17 @@ document.getElementById('voice-confirm-form').addEventListener('submit', async (
         
         if (res.ok) {
             document.getElementById('voice-confirm-form').reset();
-            showReceipt(currentTxAmount, currentTxDestination, currentTxConcept, currentTransactionId);
+            showScreen(transferScreen);
         } else {
-            alert(data.detail);
+            alert(data.detail || 'No se pudo confirmar la identidad.');
+            document.getElementById('voice-confirm-form').reset();
             showScreen(transferScreen);
         }
     } catch (err) {
         console.error(err);
+        alert('No se pudo conectar con el servidor.');
+        document.getElementById('voice-confirm-form').reset();
+        showScreen(transferScreen);
     }
 });
 

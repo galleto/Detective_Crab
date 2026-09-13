@@ -35,7 +35,7 @@ async def evaluate_user_response(user_text: str) -> bool:
     Responde ÚNICAMENTE con TRUE o FALSE.
     """
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-3.6-flash",
         contents=prompt
     )
     result = response.text.strip().upper()
