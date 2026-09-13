@@ -1,3 +1,5 @@
+"""Reglas de riesgo e integraciones con los servicios de IA y voz."""
+
 import os
 from google import genai
 from elevenlabs.client import ElevenLabs
@@ -12,9 +14,12 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 elevenlabs_client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 def is_suspicious_transaction(amount: float, user_avg_amount: float = 1000.0) -> bool:
+    """Marca importes superiores a tres veces el promedio del usuario."""
     return amount > (user_avg_amount * 3)
 
+
 async def evaluate_user_response(user_text: str) -> bool:
+    """Pide a Gemini clasificar la respuesta como segura o potencialmente coercitiva."""
     prompt = f"""
     Eres un asistente de seguridad bancaria experto en detectar coerción, 
     estrés o engaño en las respuestas de los usuarios.
@@ -37,6 +42,7 @@ async def evaluate_user_response(user_text: str) -> bool:
     return "TRUE" in result
 
 def generate_voice_alert(message: str) -> bytes:
+    """Convierte la alerta escrita a audio MP3 para reproducirla en el frontend."""
     try:
         audio = elevenlabs_client.text_to_speech.convert(
             text=message,

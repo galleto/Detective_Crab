@@ -1,20 +1,23 @@
+// Prefijo común para que el frontend use la API servida por FastAPI.
 const API_URL = '/api';
 
+// Estado mínimo de la sesión y de la transferencia retenida.
 let currentUserId = null;
 let currentTransactionId = null;
 
-// Screens
+// Referencias a las vistas que se alternan durante el flujo bancario.
 const loginScreen = document.getElementById('login-screen');
 const transferScreen = document.getElementById('transfer-screen');
 const voiceAuthScreen = document.getElementById('voice-auth-screen');
 const errorScreen = document.getElementById('error-screen');
 
 function showScreen(screenEl) {
+    // Solo una pantalla permanece visible a la vez.
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     screenEl.classList.add('active');
 }
 
-// Login
+// Envía las credenciales y conserva el identificador de usuario recibido.
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('login-username').value;
@@ -39,7 +42,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 });
 
-// Transfer
+// Envía la transferencia y dirige la interfaz según el nivel de riesgo.
 document.getElementById('transfer-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const destination = document.getElementById('tx-destination').value;
@@ -62,14 +65,14 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
         const data = await res.json();
 
         if (res.status === 503) {
-            // Flujo de Peligro
+            // El PIN invertido activa la pantalla de alerta silenciosa.
             showScreen(errorScreen);
         } else if (res.ok) {
             if (data.status === 'held') {
-                // Flujo Sospechoso
+                // La API retuvo la operación y devolvió el audio de seguridad.
                 currentTransactionId = data.transaction_id;
                 
-                // Cargar audio base64
+                // El audio llega embebido para poder reproducirse sin otra ruta.
                 if (data.audio_base64) {
                     const audioEl = document.getElementById('security-audio');
                     audioEl.src = `data:audio/mp3;base64,${data.audio_base64}`;
@@ -77,7 +80,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
                 
                 showScreen(voiceAuthScreen);
             } else {
-                // Flujo Normal
+                // La API aprobó directamente la transferencia.
                 alert(`Transferencia exitosa. Nuevo saldo: $${data.new_balance}`);
                 document.getElementById('transfer-form').reset();
             }
@@ -89,7 +92,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
     }
 });
 
-// Voice Confirm
+// Envía la respuesta del usuario para que Gemini decida si liberar el hold.
 document.getElementById('voice-confirm-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const userText = document.getElementById('user-voice-response').value;

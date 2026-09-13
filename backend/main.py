@@ -1,3 +1,5 @@
+"""Punto de entrada de FastAPI y servidor de archivos del frontend."""
+
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +11,7 @@ from .routes import router as api_router
 
 app = FastAPI(title="Hacktec Banco PWA API")
 
-# CORS setup for local development
+# Permite que el frontend local consuma la API durante el prototipado.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,17 +22,19 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_db_client():
+    """Abre MongoDB y prepara la tabla de auditoría antes de recibir tráfico."""
     await connect_mongo()
     init_snowflake()
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    """Cierra las conexiones administradas por el backend."""
     await close_mongo()
 
-# Incluir las rutas de la API
+# Todas las rutas de negocio quedan agrupadas bajo `/api`.
 app.include_router(api_router, prefix="/api")
 
-# Montar los estáticos para el frontend PWA
+# Sirve los recursos de la PWA desde el mismo proceso que la API.
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/static", StaticFiles(directory=frontend_path), name="static")

@@ -1,4 +1,4 @@
-# Usa una imagen oficial de Python ligera
+# Usa una imagen oficial de Python ligera como base reproducible.
 FROM python:3.11-slim
 
 # Establece el directorio de trabajo
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el resto del código del proyecto
+# Copia backend, frontend y configuración dentro de la imagen.
 COPY . .
 
 # Expone el puerto donde correrá FastAPI

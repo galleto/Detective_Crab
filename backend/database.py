@@ -1,3 +1,5 @@
+"""Clientes y operaciones de inicialización de los almacenes externos."""
+
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 import snowflake.connector
@@ -11,9 +13,12 @@ mongo_client = None
 db = None
 
 def get_mongo_db():
+    """Devuelve la base de datos MongoDB abierta durante el arranque."""
     return db
 
+
 async def connect_mongo():
+    """Crea el cliente asíncrono y selecciona la base `banco_db`."""
     global mongo_client, db
     print("Conectando a MongoDB...")
     mongo_client = AsyncIOMotorClient(MONGO_URI)
@@ -21,12 +26,14 @@ async def connect_mongo():
     print("Conexión a MongoDB establecida.")
 
 async def close_mongo():
+    """Libera el cliente MongoDB cuando la aplicación se apaga."""
     global mongo_client
     if mongo_client:
         mongo_client.close()
 
 # Snowflake Config
 def get_snowflake_conn():
+    """Abre una conexión Snowflake usando las variables del archivo `.env`."""
     conn = snowflake.connector.connect(
         user=os.getenv("SNOWFLAKE_USER"),
         password=os.getenv("SNOWFLAKE_PASSWORD"),
@@ -39,6 +46,7 @@ def get_snowflake_conn():
     return conn
 
 def init_snowflake():
+    """Garantiza que exista la tabla usada para auditar transacciones."""
     print("Iniciando conexión a Snowflake...")
     try:
         conn = get_snowflake_conn()

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+<!-- Documento raíz: define las cuatro vistas que app.js alterna. -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SecureBank PWA</title>
+    <!-- El manifiesto permite instalar la interfaz como PWA. -->
     <link rel="manifest" href="/static/manifest.json">
     <link rel="stylesheet" href="/static/css/style.css">
     <!-- Iconos de Material Design -->
@@ -97,6 +99,7 @@
 
     </div>
 
+    <!-- La lógica se carga al final para que los elementos del DOM ya existan. -->
     <script src="/static/js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

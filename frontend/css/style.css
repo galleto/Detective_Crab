@@ -1,3 +1,4 @@
+/* Normaliza medidas y tipografía para que la PWA conserve un layout estable. */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -5,11 +6,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Fondo exterior y color base de la aplicación. */
 body {
     background-color: #f4f6f8;
     color: #333;
 }
 
+/* Contenedor móvil centrado que simula la aplicación bancaria. */
 .app-container {
     max-width: 480px;
     margin: 0 auto;
@@ -19,6 +22,7 @@ body {
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
+/* Las pantallas se alternan añadiendo la clase `active` desde app.js. */
 .screen {
     display: none;
     padding: 20px;
@@ -28,6 +32,7 @@ body {
     display: block;
 }
 
+/* Identidad visual de la pantalla de inicio. */
 .header-logo {
     text-align: center;
     margin: 40px 0;
@@ -38,6 +43,7 @@ body {
     margin-top: 10px;
 }
 
+/* Barra superior de la vista de transferencias. */
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -54,6 +60,7 @@ body {
     cursor: pointer;
 }
 
+/* Agrupa el formulario principal y separa su contenido del fondo. */
 .card {
     background: #fff;
     border-radius: 12px;
@@ -67,6 +74,7 @@ body {
     color: #444;
 }
 
+/* Espaciado común para etiquetas y controles de formulario. */
 .input-group {
     margin-bottom: 15px;
 }
@@ -93,6 +101,7 @@ body {
     font-size: 12px;
 }
 
+/* Estilo base compartido por las acciones de la interfaz. */
 .btn {
     width: 100%;
     padding: 14px;
@@ -118,6 +127,7 @@ body {
     color: #333;
 }
 
+/* Mensaje visual para una transferencia retenida por riesgo. */
 .alert-box {
     padding: 15px;
     border-radius: 8px;
@@ -131,6 +141,7 @@ body {
     border: 1px solid #ffeeba;
 }
 
+/* Área del reproductor que contiene la alerta generada por ElevenLabs. */
 .audio-player {
     margin: 20px 0;
     text-align: center;
@@ -140,6 +151,7 @@ body {
     width: 100%;
 }
 
+/* Presentación de la respuesta 503 del flujo de pánico. */
 .error-container {
     text-align: center;
     padding-top: 60px;

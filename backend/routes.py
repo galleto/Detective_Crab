@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+"""Endpoints HTTP que coordinan validación, reglas de riesgo y persistencia."""
+
+from fastapi import APIRouter, HTTPException
 import uuid
 import base64
-from typing import Dict
 
 from .models import TransferRequest, VoiceConfirmRequest, LoginRequest
 from .database import get_mongo_db, get_snowflake_conn
@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(request: LoginRequest):
+    """Busca al usuario y crea un perfil de demostración si aún no existe."""
     # Simulación de login con MongoDB
     db = get_mongo_db()
     user = await db.usuarios.find_one({"username": request.username})
@@ -36,6 +37,7 @@ async def login(request: LoginRequest):
 
 @router.post("/transfer")
 async def transfer(request: TransferRequest):
+    """Ejecuta el flujo normal, de pánico o de revisión por monto inusual."""
     db = get_mongo_db()
     user = await db.usuarios.find_one({"user_id": request.user_id})
     
@@ -105,6 +107,7 @@ async def transfer(request: TransferRequest):
 
 @router.post("/confirm_transfer")
 async def confirm_transfer(request: VoiceConfirmRequest):
+    """Resuelve una transferencia retenida a partir del análisis de Gemini."""
     """
     Endpoint llamado después de que el usuario escucha el audio de ElevenLabs
     y responde por texto/voz (simulado por texto).
